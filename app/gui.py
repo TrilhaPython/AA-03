@@ -99,18 +99,23 @@ class WeatherApp:
             # Verificar se o arquivo existe
             if os.path.exists(file_path) and os.path.isfile(file_path):
                 # Ler o arquivo CSV
-                data = pd.read_csv(file_path, sep=';', encoding='ISO-8859-1', skiprows=8)
+                data = pd.read_csv(file_path, sep=';', encoding='ISO-8859-1', skiprows=8, decimal=",")
                 
                 # Extrair mês e ano da coluna de data
                 data['Data'] = pd.to_datetime(data['DATA (YYYY-MM-DD)'], format='%Y-%m-%d')
                 data['Mês'] = data['Data'].dt.month
                 data['Ano'] = data['Data'].dt.year
                 
+                data.loc[data["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"].abs() > 1000, "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"] = None
+                data.loc[data['TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)'].abs() > 1000, 'TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)'] = None
+                
                 # Calcular a média da temperatura máxima por mês
-                max_temp_monthly = data.groupby(['Ano', 'Mês'])['TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)'].max()
+                max_temp_monthly = data.groupby(['Ano', 'Mês'])['TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)'].mean()
+                
+                    
                 
                 # Calcular a máxima das precipitações por mês
-                max_precip_monthly = data.groupby(['Ano', 'Mês'])['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'].max()
+                max_precip_monthly = data.groupby(['Ano', 'Mês'])['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'].sum()
                 
                 # Resetar o índice para tornar os índices de Ano e Mês em colunas
                 max_temp_monthly_reset = max_temp_monthly.reset_index()

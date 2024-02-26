@@ -2,7 +2,6 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import zipfile
-import re
 
 def get_weather_data_links():
     url = "https://portal.inmet.gov.br/dadoshistoricos"
